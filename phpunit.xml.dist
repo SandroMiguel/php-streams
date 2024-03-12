@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="vendor/autoload.php" colors="true">
+    <coverage>
+        <include>
+            <directory>./src</directory>
+        </include>
+    </coverage>
+    <testsuites>
+        <testsuite name="PHP Sceleto Test Suite">
+            <directory>./src/tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

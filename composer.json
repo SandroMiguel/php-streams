@@ -1,0 +1,73 @@
+{
+    "name": "sandromiguel/php-streams",
+    "description": "A PHP library for stream handling following PSR-7 standards.",
+    "homepage": "https://github.com/SandroMiguel/php-sceleto",
+    "keywords": [
+        "php",
+        "psr-7",
+        "stream"
+    ],
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sandro Miguel Marques",
+            "email": "sandromiguel@sandromiguel.com",
+            "homepage": "http://sandromiguel.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/SandroMiguel/php-streams/issues"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpStreams\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "require": {
+        "php": ">=8.1",
+        "psr/http-message": "^2.0"
+    },
+    "require-dev": {
+        "nunomaduro/phpinsights": "^2.11",
+        "phan/phan": "^5.4",
+        "phpmetrics/phpmetrics": "^2.8",
+        "phpspec/phpspec": "^7.5",
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^9",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "roave/security-advisories": "dev-master",
+        "vimeo/psalm": "^5.22"
+    },
+    "scripts": {
+        "outdated:direct": "composer outdated --direct",
+        "phpcs": "~/.config/composer/vendor/bin/phpcs -s src",
+        "phpcs:file": "~/.config/composer/vendor/bin/phpcs -s",
+        "phpinsights": "phpinsights analyse src/ -v",
+        "phpmetrics": "vendor/bin/phpmetrics --report-html=storage/log/php_metrics_report . && node --version",
+        "phpstan": "phpstan analyse src --level 7",
+        "psalm": "psalm --show-info=true",
+        "logs": "tail -f ./storage/log/app.log",
+        "test": "phpunit --colors=always",
+        "test:coverage": "phpunit --coverage-html log/report"
+    },
+    "scripts-description": {
+        "outdated:direct": "Check for outdated Composer dependencies that are defined directly in your project.",
+        "phpcs": "Run PHP CodeSniffer on the source code in src directory.",
+        "phpcs:file": "Run PHP CodeSniffer on a specific file.",
+        "phpinsights": "Analyze code quality and architecture with PHP Insights.",
+        "phpmetrics": "Generate PHP Metrics report and display Node.js version.",
+        "phpstan": "Run PHPStan analysis with level 7 on the source code in src directory.",
+        "psalm": "Run Psalm static analysis.",
+        "logs": "Tail the application log located at ./storage/log/app.log.",
+        "test": "Run PHPUnit tests.",
+        "test:coverage": "Run PHPUnit tests and generate coverage report in log/report directory."
+    }
+}

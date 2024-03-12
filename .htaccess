@@ -1,0 +1,139 @@
+# .htaccess v3.8.1 php-sceleto (2023-10-07) sandromiguel@sandromiguel.com
+
+########################
+# Show/Hide PHP errors #
+########################
+# php_flag display_errors on
+# php_value error_reporting 30719
+php_flag display_errors off
+php_value error_reporting 0
+
+# Debug mode
+# SetEnv DEBUG true
+
+##########
+# Upload #
+##########
+php_value upload_max_filesize 100M
+php_value post_max_size 0
+
+##################################################################################
+# Character encodings                                                            #
+#                                                                                #
+# Serve all resources labeled as `text/html` or `text/plain`                     #
+# with the media type `charset` parameter set to `UTF-8`.                        #
+#                                                                                #
+# Credits: https://httpd.apache.org/docs/current/mod/core.html#adddefaultcharset #
+##################################################################################
+AddDefaultCharset utf-8
+
+######################################################################
+# Security                                                           #
+#                                                                    #
+# Credits: https://httpd.apache.org/docs/2.4/misc/security_tips.html #
+######################################################################
+<Files ".ht*">
+    Require all denied
+</Files>
+<Files *.log>
+    Require all denied
+</Files>
+
+# Hide a specific file
+<Files .env>
+    Order allow,deny
+    Deny from all
+</Files>
+
+###################################
+# Rewrite engine                  #
+###################################
+<IfModule mod_rewrite.c>
+
+    RewriteEngine On
+
+    # Exclude files and directories from rewrite rule
+    RewriteRule ^robots.txt public/robots.txt [L]
+    RewriteRule ^humans.txt public/humans.txt [L]
+    RewriteRule ^sitemap.xml public/sitemap.xml [L]
+    RewriteRule ^favicon.ico public/icons/favicon.ico [L]
+    RewriteRule ^(backoffice-directory)($|/) - [L]
+    RewriteRule ^(public/js) - [L]
+
+    # To redirect from www to non www (Rewrite www.example.com → example.com)
+    RewriteCond %{HTTP_HOST} ^www\.(.+) [NC]
+    RewriteRule ^(.*) http%{ENV:protossl}://%1/$1 [R=301,NE,L]
+
+    # Redirect HTTP to HTTPS automatically for all domains except those ending in .local
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !\.local$
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+	# API (Web Service): Front Controller (Rewrite 1.0/abc → api/v1.0/index.php)
+    RewriteRule ^([0-9]).([0-9])/(.*)$ api/v$1.$2/index.php [B,NE,NC,L]
+
+    # Spefic language, page and item
+    # E.g. en/some-page/some-item → public/index.php?lang=en&pageName=some-page&itemName=some-item
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^([a-z]{2})?\/?([^\/]+)?\/?([^\/]+)?\/? public/index.php?lang=$1&pageName=$2&itemUniqueName=$3 [L,QSA]
+
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set X-Content-Type-Options: "nosniff"
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+</IfModule>
+
+#################
+# Cache-Control #
+#################
+
+# JS and CSS files - 4 months
+<filesMatch ".(js|css)$">
+ Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+</filesMatch>
+
+# Media files - 4 months
+<filesMatch ".(ico|jpg|jpeg|png|gif|webp|svg)$">
+ Header set Cache-Control "max-age=10518975, public"
+</filesMatch>
+
+# Font files - 1 year
+<filesMatch ".(woff2)$">
+ Header set Cache-Control "max-age=31556926, public"
+</filesMatch>
+
+#################################################################
+# Fingerprinting Attacks                                        #
+#                                                               #
+# Credits: https://htaccessbook.com/php-fingerprinting-attacks/ #
+#################################################################
+<IfModule mod_rewrite.c>
+	RewriteCond %{QUERY_STRING} PHP[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12} [NC,OR]
+	RewriteCond %{REQUEST_URI} =PHP[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12} [NC]
+	RewriteRule .* - [F,L]
+</IfModule>
+
+# #############################################################
+# Deny POST requests using HTTP 1.0                           #
+#                                                             #
+# Credits: https://perishablepress.com/protect-post-requests/ #
+# #############################################################
+<IfModule mod_rewrite.c>
+	RewriteCond %{THE_REQUEST} ^POST(.*)HTTP/(0\.9|1\.0)$ [NC]
+	RewriteRule .* - [F,L]
+</IfModule>
+
+# ###############################################################################
+# Allow POST based on referer                                                   #
+#                                                                               #
+# Credits: https://httpd.apache.org/docs/current/mod/mod_rewrite.html           #
+# ###############################################################################
+<IfModule mod_rewrite.c>
+	RewriteCond %{REQUEST_METHOD} POST
+    RewriteCond expr "! %{HTTP_REFERER} -strmatch '*://%{HTTP_HOST}/*'"
+	RewriteRule .* - [F,L]
+</IfModule>
