@@ -119,6 +119,10 @@ Bytes written: 8
 ### Reading a Specific Number of Bytes from a File
 
 ```php
+require 'vendor/autoload.php';
+
+use PhpStreams\Stream;
+
 // Open a file for reading
 $fileHandle = fopen('example.txt', 'r');
 
@@ -159,6 +163,10 @@ Remaining data:  my name is example.txt
 ### Getting Stream Metadata
 
 ```php
+require 'vendor/autoload.php';
+
+use PhpStreams\Stream;
+
 // Open a file for reading
 $fileHandle = fopen('example.txt', 'r');
 
