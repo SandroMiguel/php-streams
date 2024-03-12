@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 (2024-03-12)
+
+
+### Features
+
+* initial commit ([8254d3e](https://github.com/SandroMiguel/php-streams/commit/8254d3ed9519edd23e24431e67900a5cf947c994))
+
 ## [2.0.3](https://github.com/SandroMiguel/php-sceleto/compare/v2.0.2...v2.0.3) (2024-03-05)
 
 
