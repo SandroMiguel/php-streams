@@ -18,6 +18,12 @@ composer require sandromiguel/php-streams
 
 ## Usage
 
+#### Try it on replit.com
+
+Try out the interactive examples on the replit.com platform:
+
+[Run on replit.com](https://replit.com/@SandroMiguel/PhpStreams)
+
 ### Text Stream in Memory
 
 ```php
