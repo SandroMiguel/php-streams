@@ -7,7 +7,7 @@
  * @license MIT https://github.com/SandroMiguel/php-streams/blob/main/LICENSE
  * @author Sandro Miguel Marques <sandromiguel@sandromiguel.com>
  * @link https://github.com/SandroMiguel/php-streams
- * @version 1.0.0 (2024-03-12)
+ * @version 1.0.1 (2024-03-13)
  */
 
 declare(strict_types=1);

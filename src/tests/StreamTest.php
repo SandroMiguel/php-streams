@@ -4,10 +4,10 @@
  * StreamTest
  *
  * @package PhpStreams
- * @license MIT https://github.com/SandroMiguel/php-payload/blob/main/LICENSE
+ * @license MIT https://github.com/SandroMiguel/php-streams/blob/main/LICENSE
  * @author Sandro Miguel Marques <sandromiguel@sandromiguel.com>
- * @link https://github.com/SandroMiguel/php-payload
- * @version 1.0.0 (2024-03-10)
+ * @link https://github.com/SandroMiguel/php-streams
+ * @version 1.1.0 (2024-03-13)
  */
 
 declare(strict_types=1);
