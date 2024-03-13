@@ -5,7 +5,7 @@ PhpStreams is a PHP library that provides stream handling following the PSR-7 st
 ## Features
 
 -   **Stream Manipulation**: Read from and write to streams with ease.
--   **PSR-7 Compatibility**: Conforms to the PSR-7 standards for interoperability.
+-   **PSR-7 Compatibility**: Conforms to the [PSR-7](https://www.php-fig.org/psr/psr-7/) standards for interoperability.
 -   **Flexible**: Offers a comprehensive set of features for stream manipulation.
 
 ## Installation

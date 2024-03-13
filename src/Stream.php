@@ -7,7 +7,7 @@
  * @license MIT https://github.com/SandroMiguel/php-streams/blob/main/LICENSE
  * @author Sandro Miguel Marques <sandromiguel@sandromiguel.com>
  * @link https://github.com/SandroMiguel/php-streams
- * @version 1.0.1 (2024-03-13)
+ * @version 1.0.2 (2024-03-13)
  */
 
 declare(strict_types=1);
@@ -23,6 +23,9 @@ class Stream implements StreamInterface
 {
     /** @var resource|null Wrapped resource */
     private $resource;
+
+    /** @var array<string,mixed>|null Cached metadata */
+    private ?array $metadata;
 
     /**
      * Constructor.
@@ -51,6 +54,7 @@ class Stream implements StreamInterface
         }
 
         $this->resource = $resource;
+        $this->metadata = null;
     }
 
     /**
@@ -385,13 +389,15 @@ class Stream implements StreamInterface
             return null;
         }
 
-        $meta = \stream_get_meta_data($this->resource);
-
-        if ($key === null) {
-            return $meta;
+        if ($this->metadata === null) {
+            $this->metadata = \stream_get_meta_data($this->resource);
         }
 
-        return $meta[$key] ?? null;
+        if ($key === null) {
+            return $this->metadata;
+        }
+
+        return $this->metadata[$key] ?? null;
     }
 
     /**
