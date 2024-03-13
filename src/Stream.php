@@ -334,20 +334,28 @@ class Stream implements StreamInterface
      *  offset bytes SEEK_CUR: Set position to current location plus offset
      *  SEEK_END: Set position to end-of-stream plus offset.
      *
-     * @throws \RuntimeException On failure.
-     * @throws \InvalidArgumentException If $whence is invalid.
+     * @throws \PhpStreams\Exceptions\ReadException If resource is not
+     *  available.
+     * @throws \PhpStreams\Exceptions\SeekException If stream is not seekable.
+     * @throws \PhpStreams\Exceptions\InvalidStreamException If invalid seek
+     *   offset is specified.
      */
     public function seek(int $offset, int $whence = \SEEK_SET): void
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
         }
 
         if (!$this->isSeekable()) {
-            throw new \RuntimeException('Stream is not seekable');
+            throw new \PhpStreams\Exceptions\SeekException(
+                'Stream is not seekable.'
+            );
         }
+
         if ($offset < 0) {
-            throw new \InvalidArgumentException(
+            throw new \PhpStreams\Exceptions\InvalidStreamException(
                 'Invalid seek offset: must be non-negative'
             );
         }
@@ -355,7 +363,7 @@ class Stream implements StreamInterface
         $result = \fseek($this->resource, $offset, $whence);
 
         if ($result === -1) {
-            throw new \RuntimeException('Unable to seek stream');
+            throw new \PhpStreams\Exceptions\SeekException();
         }
     }
 
