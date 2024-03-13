@@ -4,9 +4,9 @@
  * Stream
  *
  * @package PhpStreams
- * @license MIT https://github.com/SandroMiguel/php-api-router/blob/main/LICENSE
+ * @license MIT https://github.com/SandroMiguel/php-streams/blob/main/LICENSE
  * @author Sandro Miguel Marques <sandromiguel@sandromiguel.com>
- * @link https://github.com/SandroMiguel/php-api-router
+ * @link https://github.com/SandroMiguel/php-streams
  * @version 1.0.0 (2024-03-12)
  */
 
@@ -29,13 +29,27 @@ class Stream implements StreamInterface
      *
      * @param resource|bool $resource Resource to wrap.
      *
-     * @throws \InvalidArgumentException If the resource is not a stream.
+     * @throws \PhpStreams\Exceptions\InvalidStreamException If the resource is
+     *  not a stream.
      */
     public function __construct($resource)
     {
-        if (!\is_resource($resource)) {
-            throw new \InvalidArgumentException('Invalid resource provided.');
+        if (
+            !\is_resource($resource)
+            || \get_resource_type($resource) !== 'stream'
+        ) {
+            $resourceType = \is_resource($resource)
+                ? \get_resource_type($resource)
+                : 'non-resource';
+
+            throw new \PhpStreams\Exceptions\InvalidStreamException(
+                \sprintf(
+                    'Invalid or non-stream resource provided. Provided resource type: %s',
+                    $resourceType
+                )
+            );
         }
+
         $this->resource = $resource;
     }
 

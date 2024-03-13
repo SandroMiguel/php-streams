@@ -23,6 +23,31 @@ use PHPUnit\Framework\TestCase;
 class StreamTest extends TestCase
 {
     /**
+     * Test that the stream can be constructed with a valid resource.
+     */
+    public function testConstructorWithValidResource(): void
+    {
+        $resource = \fopen('php://temp', 'r+');
+        $stream = new Stream($resource);
+        $this->assertInstanceOf(Stream::class, $stream);
+    }
+
+    /**
+     * Test that the stream cannot be constructed with an invalid resource.
+     */
+    public function testConstructorWithInvalidResource(): void
+    {
+        $this->expectException(
+            \PhpStreams\Exceptions\InvalidStreamException::class
+        );
+        $this->expectExceptionMessage(
+            'Invalid or non-stream resource provided. Provided resource type: non-resource'
+        );
+
+        new Stream('invalid_resource');
+    }
+
+    /**
      * Test that the stream is seekable.
      */
     public function testIsSeekableReturnsTrueForSeekableStream(): void
