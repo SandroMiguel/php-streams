@@ -1,4 +1,4 @@
-# Contributing to PHP Sceleto
+# Contributing to PhpStreams
 
 Want to contribute? All contributions are welcome.
 
