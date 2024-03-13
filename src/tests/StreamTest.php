@@ -167,8 +167,25 @@ class StreamTest extends TestCase
         $resource = \fopen('php://stdout', 'w');
         $stream = new Stream($resource);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\PhpStreams\Exceptions\ReadException::class);
+        $this->expectExceptionMessage(
+            'Stream is not readable: unable to read from stream.'
+        );
         $stream->read(1);
+    }
+
+    /**
+     * Test to ensure that ReadException is thrown when the stream is not
+     *  readable.
+     */
+    public function testReadFromUnreadableStreamThrowsException(): void
+    {
+        $this->expectException(\PhpStreams\Exceptions\ReadException::class);
+        $this->expectExceptionMessage('Stream is not readable');
+
+        $stream = new Stream(\fopen('php://output', 'w'));
+        // Attempt to read from a non-readable stream
+        $stream->read(1024);
     }
 
     /**
