@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/SandroMiguel/php-streams/compare/v1.0.0...v1.1.0) (2024-03-13)
+
+
+### Features
+
+* **ReadException.php:** new class for handling read errors ([48783a8](https://github.com/SandroMiguel/php-streams/commit/48783a82efb93a31ccccd7d6559b5df4ac95567c))
+* **SeekException.php:** updated rewind method with specific exceptions, introducing SeekException ([14a6039](https://github.com/SandroMiguel/php-streams/commit/14a603948fb44afb18814c36c30c45c97e59058a))
+* **Stream.php:** improve error handling in getContents method ([97ffe10](https://github.com/SandroMiguel/php-streams/commit/97ffe10c2c87370d1b0dcffb3eacb1279629afa9))
+* **Stream.php:** improve Stream constructor error handling ([40e975f](https://github.com/SandroMiguel/php-streams/commit/40e975f25454d12345b961182288045d8ded4f2d))
+* **Stream.php:** refactored exception handling in the seek() to use specific exception classes ([8021d80](https://github.com/SandroMiguel/php-streams/commit/8021d80d634ca23f2aa16a806e5848c08f4abcf6))
+* **Stream.php:** refactored getContents method to include custom exception handling ([7d951e0](https://github.com/SandroMiguel/php-streams/commit/7d951e07e92852596fb4d7dc366f4a564dd9b5a1))
+* **WriteException.php:** implemented WriteException for improved write error handling ([e367395](https://github.com/SandroMiguel/php-streams/commit/e367395d059403464e843bac75bc1c40cd148ec3))
+
 ## 1.0.0 (2024-03-12)
 
 
