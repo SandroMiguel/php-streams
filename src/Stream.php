@@ -218,7 +218,9 @@ class Stream implements StreamInterface
     public function tell(): int
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
         }
 
         $result = \ftell($this->resource);
@@ -236,22 +238,30 @@ class Stream implements StreamInterface
      * If the stream is not seekable, this method will raise an exception;
      * otherwise, it will perform a seek(0).
      *
-     * @throws \RuntimeException On failure.
+     * @throws \PhpStreams\Exceptions\ReadException If resource is not
+     *  available.
+     * @throws \PhpStreams\Exceptions\SeekException If stream is not seekable.
      */
     public function rewind(): void
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
         }
 
         if (!$this->isSeekable()) {
-            throw new \RuntimeException('Stream is not seekable');
+            throw new \PhpStreams\Exceptions\SeekException(
+                'Stream is not seekable.'
+            );
         }
 
         $result = \fseek($this->resource, 0, \SEEK_SET);
 
         if ($result === -1) {
-            throw new \RuntimeException('Unable to rewind stream');
+            throw new \PhpStreams\Exceptions\SeekException(
+                'Unable to rewind stream.'
+            );
         }
     }
 
