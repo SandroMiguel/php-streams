@@ -219,10 +219,15 @@ class StreamTest extends TestCase
      */
     public function testWriteThrowsExceptionWhenStreamNotWritable(): void
     {
+        // Arrange
         $resource = \fopen('php://stdin', 'r');
         $stream = new Stream($resource);
 
-        $this->expectException(\RuntimeException::class);
+        // Assert
+        $this->expectException(\PhpStreams\Exceptions\WriteException::class);
+        $this->expectExceptionMessage('Stream is not writable');
+
+        // Act
         $stream->write('Hello, world!');
     }
 
