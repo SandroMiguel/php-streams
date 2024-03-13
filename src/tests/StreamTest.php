@@ -446,6 +446,37 @@ class StreamTest extends TestCase
     }
 
     /**
+     * Test that the seek method throws an exception when the stream is not
+     *  seekable.
+     */
+    public function testSeekStreamNotSeekable(): void
+    {
+        $this->expectException(\PhpStreams\Exceptions\SeekException::class);
+        $this->expectExceptionMessage('Stream is not seekable');
+
+        $resource = \fopen('php://output', 'w');
+        $stream = new Stream($resource);
+        $stream->seek(0);
+    }
+
+    /**
+     * Test that the seek method throws an exception for invalid seek offsets.
+     */
+    public function testSeekInvalidOffset(): void
+    {
+        $this->expectException(
+            \PhpStreams\Exceptions\InvalidStreamException::class
+        );
+        $this->expectExceptionMessage(
+            'Invalid seek offset: must be non-negative'
+        );
+
+        $resource = \fopen('php://temp', 'wb+');
+        $stream = new Stream($resource);
+        $stream->seek(-1);
+    }
+
+    /**
      * Test that getMetadata returns an array on success.
      */
     public function testGetMetadataReturnsArray(): void
