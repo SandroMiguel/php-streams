@@ -4,10 +4,10 @@
  * Stream
  *
  * @package PhpStreams
- * @license MIT https://github.com/SandroMiguel/php-api-router/blob/main/LICENSE
+ * @license MIT https://github.com/SandroMiguel/php-streams/blob/main/LICENSE
  * @author Sandro Miguel Marques <sandromiguel@sandromiguel.com>
- * @link https://github.com/SandroMiguel/php-api-router
- * @version 1.0.0 (2024-03-12)
+ * @link https://github.com/SandroMiguel/php-streams
+ * @version 1.0.1 (2024-03-13)
  */
 
 declare(strict_types=1);
@@ -29,13 +29,27 @@ class Stream implements StreamInterface
      *
      * @param resource|bool $resource Resource to wrap.
      *
-     * @throws \InvalidArgumentException If the resource is not a stream.
+     * @throws \PhpStreams\Exceptions\InvalidStreamException If the resource is
+     *  not a stream.
      */
     public function __construct($resource)
     {
-        if (!\is_resource($resource)) {
-            throw new \InvalidArgumentException('Invalid resource provided.');
+        if (
+            !\is_resource($resource)
+            || \get_resource_type($resource) !== 'stream'
+        ) {
+            $resourceType = \is_resource($resource)
+                ? \get_resource_type($resource)
+                : 'non-resource';
+
+            throw new \PhpStreams\Exceptions\InvalidStreamException(
+                \sprintf(
+                    'Invalid or non-stream resource provided. Provided resource type: %s',
+                    $resourceType
+                )
+            );
         }
+
         $this->resource = $resource;
     }
 
@@ -103,16 +117,20 @@ class Stream implements StreamInterface
      * @return string Returns the data read from the stream, or an empty string
      *  if no bytes are available.
      *
-     * @throws \RuntimeException If an error occurs.
+     * @throws \PhpStreams\Exceptions\ReadException If an error occurs.
      */
     public function read(int $length): string
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
         }
 
         if (!$this->isReadable()) {
-            throw new \RuntimeException('Stream is not readable');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Stream is not readable: unable to read from stream.'
+            );
         }
 
         $length = \max(0, $length);
@@ -120,7 +138,9 @@ class Stream implements StreamInterface
         $result = \fread($this->resource, $length);
 
         if ($result === false) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Error reading from stream: unable to read data.'
+            );
         }
 
         return $result;
@@ -133,22 +153,26 @@ class Stream implements StreamInterface
      *
      * @return int Returns the number of bytes written to the stream.
      *
-     * @throws \RuntimeException If an error occurs.
+     * @throws \PhpStreams\Exceptions\WriteException If an error occurs.
      */
     public function write(string $string): int
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\WriteException();
         }
 
         if (!$this->isWritable()) {
-            throw new \RuntimeException('Stream is not writable');
+            throw new \PhpStreams\Exceptions\WriteException(
+                'Stream is not writable'
+            );
         }
 
         $result = \fwrite($this->resource, $string);
 
         if ($result === false) {
-            throw new \RuntimeException('Unable to write to stream');
+            throw new \PhpStreams\Exceptions\WriteException(
+                'Unable to write data to stream.'
+            );
         }
 
         return $result;
@@ -194,7 +218,9 @@ class Stream implements StreamInterface
     public function tell(): int
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
         }
 
         $result = \ftell($this->resource);
@@ -212,22 +238,30 @@ class Stream implements StreamInterface
      * If the stream is not seekable, this method will raise an exception;
      * otherwise, it will perform a seek(0).
      *
-     * @throws \RuntimeException On failure.
+     * @throws \PhpStreams\Exceptions\ReadException If resource is not
+     *  available.
+     * @throws \PhpStreams\Exceptions\SeekException If stream is not seekable.
      */
     public function rewind(): void
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
         }
 
         if (!$this->isSeekable()) {
-            throw new \RuntimeException('Stream is not seekable');
+            throw new \PhpStreams\Exceptions\SeekException(
+                'Stream is not seekable.'
+            );
         }
 
         $result = \fseek($this->resource, 0, \SEEK_SET);
 
         if ($result === -1) {
-            throw new \RuntimeException('Unable to rewind stream');
+            throw new \PhpStreams\Exceptions\SeekException(
+                'Unable to rewind stream.'
+            );
         }
     }
 
@@ -252,19 +286,26 @@ class Stream implements StreamInterface
      *
      * @return string Returns the remaining contents in the stream as a string.
      *
-     * @throws \RuntimeException If unable to read or an error occurs while
-     *  reading.
+     * @throws \PhpStreams\Exceptions\ReadException If error occurs.
      */
     public function getContents(): string
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
+        }
+
+        if (\get_resource_type($this->resource) !== 'stream') {
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: supplied resource is not a valid stream resource.'
+            );
         }
 
         $result = \stream_get_contents($this->resource);
 
         if ($result === false) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException();
         }
 
         return $result;
@@ -293,20 +334,28 @@ class Stream implements StreamInterface
      *  offset bytes SEEK_CUR: Set position to current location plus offset
      *  SEEK_END: Set position to end-of-stream plus offset.
      *
-     * @throws \RuntimeException On failure.
-     * @throws \InvalidArgumentException If $whence is invalid.
+     * @throws \PhpStreams\Exceptions\ReadException If resource is not
+     *  available.
+     * @throws \PhpStreams\Exceptions\SeekException If stream is not seekable.
+     * @throws \PhpStreams\Exceptions\InvalidStreamException If invalid seek
+     *   offset is specified.
      */
     public function seek(int $offset, int $whence = \SEEK_SET): void
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
         }
 
         if (!$this->isSeekable()) {
-            throw new \RuntimeException('Stream is not seekable');
+            throw new \PhpStreams\Exceptions\SeekException(
+                'Stream is not seekable.'
+            );
         }
+
         if ($offset < 0) {
-            throw new \InvalidArgumentException(
+            throw new \PhpStreams\Exceptions\InvalidStreamException(
                 'Invalid seek offset: must be non-negative'
             );
         }
@@ -314,7 +363,7 @@ class Stream implements StreamInterface
         $result = \fseek($this->resource, $offset, $whence);
 
         if ($result === -1) {
-            throw new \RuntimeException('Unable to seek stream');
+            throw new \PhpStreams\Exceptions\SeekException();
         }
     }
 

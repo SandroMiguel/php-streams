@@ -4,10 +4,10 @@
  * StreamTest
  *
  * @package PhpStreams
- * @license MIT https://github.com/SandroMiguel/php-payload/blob/main/LICENSE
+ * @license MIT https://github.com/SandroMiguel/php-streams/blob/main/LICENSE
  * @author Sandro Miguel Marques <sandromiguel@sandromiguel.com>
- * @link https://github.com/SandroMiguel/php-payload
- * @version 1.0.0 (2024-03-10)
+ * @link https://github.com/SandroMiguel/php-streams
+ * @version 1.1.0 (2024-03-13)
  */
 
 declare(strict_types=1);
@@ -22,6 +22,31 @@ use PHPUnit\Framework\TestCase;
  */
 class StreamTest extends TestCase
 {
+    /**
+     * Test that the stream can be constructed with a valid resource.
+     */
+    public function testConstructorWithValidResource(): void
+    {
+        $resource = \fopen('php://temp', 'r+');
+        $stream = new Stream($resource);
+        $this->assertInstanceOf(Stream::class, $stream);
+    }
+
+    /**
+     * Test that the stream cannot be constructed with an invalid resource.
+     */
+    public function testConstructorWithInvalidResource(): void
+    {
+        $this->expectException(
+            \PhpStreams\Exceptions\InvalidStreamException::class
+        );
+        $this->expectExceptionMessage(
+            'Invalid or non-stream resource provided. Provided resource type: non-resource'
+        );
+
+        new Stream('invalid_resource');
+    }
+
     /**
      * Test that the stream is seekable.
      */
@@ -142,8 +167,25 @@ class StreamTest extends TestCase
         $resource = \fopen('php://stdout', 'w');
         $stream = new Stream($resource);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\PhpStreams\Exceptions\ReadException::class);
+        $this->expectExceptionMessage(
+            'Stream is not readable: unable to read from stream.'
+        );
         $stream->read(1);
+    }
+
+    /**
+     * Test to ensure that ReadException is thrown when the stream is not
+     *  readable.
+     */
+    public function testReadFromUnreadableStreamThrowsException(): void
+    {
+        $this->expectException(\PhpStreams\Exceptions\ReadException::class);
+        $this->expectExceptionMessage('Stream is not readable');
+
+        $stream = new Stream(\fopen('php://output', 'w'));
+        // Attempt to read from a non-readable stream
+        $stream->read(1024);
     }
 
     /**
@@ -177,10 +219,15 @@ class StreamTest extends TestCase
      */
     public function testWriteThrowsExceptionWhenStreamNotWritable(): void
     {
+        // Arrange
         $resource = \fopen('php://stdin', 'r');
         $stream = new Stream($resource);
 
-        $this->expectException(\RuntimeException::class);
+        // Assert
+        $this->expectException(\PhpStreams\Exceptions\WriteException::class);
+        $this->expectExceptionMessage('Stream is not writable');
+
+        // Act
         $stream->write('Hello, world!');
     }
 
@@ -211,6 +258,20 @@ class StreamTest extends TestCase
 
         // No exception thrown
         $this->assertTrue(true);
+    }
+
+    /**
+     * Test that the rewind method throws an exception when the stream is not
+     *  seekable.
+     */
+    public function testRewindStreamNotSeekable(): void
+    {
+        $this->expectException(\PhpStreams\Exceptions\SeekException::class);
+        $this->expectExceptionMessage('Stream is not seekable');
+
+        $resource = \fopen('php://output', 'w');
+        $stream = new Stream($resource);
+        $stream->rewind();
     }
 
     /**
@@ -337,6 +398,23 @@ class StreamTest extends TestCase
     }
 
     /**
+     * Test that getContents throws an exception when the stream is closed.
+     */
+    public function testGetContentsThrowsReadExceptionForClosedStream(): void
+    {
+        $stream = new Stream(\fopen('php://temp', 'r+'));
+        // Close the stream resource
+        $stream->close();
+
+        $this->expectException(\PhpStreams\Exceptions\ReadException::class);
+        $this->expectExceptionMessage(
+            'supplied resource is not a valid stream resource'
+        );
+
+        $stream->getContents();
+    }
+
+    /**
      * Test that the detach method detaches the underlying resource.
      */
     public function testDetachDetachesUnderlyingResource(): void
@@ -365,6 +443,37 @@ class StreamTest extends TestCase
 
         // Verify position after seek
         $this->assertEquals(0, $stream->tell());
+    }
+
+    /**
+     * Test that the seek method throws an exception when the stream is not
+     *  seekable.
+     */
+    public function testSeekStreamNotSeekable(): void
+    {
+        $this->expectException(\PhpStreams\Exceptions\SeekException::class);
+        $this->expectExceptionMessage('Stream is not seekable');
+
+        $resource = \fopen('php://output', 'w');
+        $stream = new Stream($resource);
+        $stream->seek(0);
+    }
+
+    /**
+     * Test that the seek method throws an exception for invalid seek offsets.
+     */
+    public function testSeekInvalidOffset(): void
+    {
+        $this->expectException(
+            \PhpStreams\Exceptions\InvalidStreamException::class
+        );
+        $this->expectExceptionMessage(
+            'Invalid seek offset: must be non-negative'
+        );
+
+        $resource = \fopen('php://temp', 'wb+');
+        $stream = new Stream($resource);
+        $stream->seek(-1);
     }
 
     /**
