@@ -153,22 +153,26 @@ class Stream implements StreamInterface
      *
      * @return int Returns the number of bytes written to the stream.
      *
-     * @throws \RuntimeException If an error occurs.
+     * @throws \PhpStreams\Exceptions\WriteException If an error occurs.
      */
     public function write(string $string): int
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\WriteException();
         }
 
         if (!$this->isWritable()) {
-            throw new \RuntimeException('Stream is not writable');
+            throw new \PhpStreams\Exceptions\WriteException(
+                'Stream is not writable'
+            );
         }
 
         $result = \fwrite($this->resource, $string);
 
         if ($result === false) {
-            throw new \RuntimeException('Unable to write to stream');
+            throw new \PhpStreams\Exceptions\WriteException(
+                'Unable to write data to stream.'
+            );
         }
 
         return $result;
