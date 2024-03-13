@@ -261,6 +261,20 @@ class StreamTest extends TestCase
     }
 
     /**
+     * Test that the rewind method throws an exception when the stream is not
+     *  seekable.
+     */
+    public function testRewindStreamNotSeekable(): void
+    {
+        $this->expectException(\PhpStreams\Exceptions\SeekException::class);
+        $this->expectExceptionMessage('Stream is not seekable');
+
+        $resource = \fopen('php://output', 'w');
+        $stream = new Stream($resource);
+        $stream->rewind();
+    }
+
+    /**
      * Test that the eof method returns true when the stream is at the end of
      *  the file.
      *
