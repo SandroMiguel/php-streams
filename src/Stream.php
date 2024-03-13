@@ -117,16 +117,20 @@ class Stream implements StreamInterface
      * @return string Returns the data read from the stream, or an empty string
      *  if no bytes are available.
      *
-     * @throws \RuntimeException If an error occurs.
+     * @throws \PhpStreams\Exceptions\ReadException If an error occurs.
      */
     public function read(int $length): string
     {
         if (!$this->resource) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
         }
 
         if (!$this->isReadable()) {
-            throw new \RuntimeException('Stream is not readable');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Stream is not readable: unable to read from stream.'
+            );
         }
 
         $length = \max(0, $length);
@@ -134,7 +138,9 @@ class Stream implements StreamInterface
         $result = \fread($this->resource, $length);
 
         if ($result === false) {
-            throw new \RuntimeException('Unable to read from stream');
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Error reading from stream: unable to read data.'
+            );
         }
 
         return $result;
