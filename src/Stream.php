@@ -286,16 +286,19 @@ class Stream implements StreamInterface
      *
      * @return string Returns the remaining contents in the stream as a string.
      *
-     * @throws \PhpStreams\Exceptions\ReadException If resource is not
-     *  available.
-     * @throws \PhpStreams\Exceptions\ReadException If unable to read or an
-     *  error occurs while reading.
+     * @throws \PhpStreams\Exceptions\ReadException If error occurs.
      */
     public function getContents(): string
     {
         if (!$this->resource) {
             throw new \PhpStreams\Exceptions\ReadException(
                 'Unable to read from stream: resource is not available.'
+            );
+        }
+
+        if (\get_resource_type($this->resource) !== 'stream') {
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: supplied resource is not a valid stream resource.'
             );
         }
 

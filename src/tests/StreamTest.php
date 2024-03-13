@@ -398,6 +398,23 @@ class StreamTest extends TestCase
     }
 
     /**
+     * Test that getContents throws an exception when the stream is closed.
+     */
+    public function testGetContentsThrowsReadExceptionForClosedStream(): void
+    {
+        $stream = new Stream(\fopen('php://temp', 'r+'));
+        // Close the stream resource
+        $stream->close();
+
+        $this->expectException(\PhpStreams\Exceptions\ReadException::class);
+        $this->expectExceptionMessage(
+            'supplied resource is not a valid stream resource'
+        );
+
+        $stream->getContents();
+    }
+
+    /**
      * Test that the detach method detaches the underlying resource.
      */
     public function testDetachDetachesUnderlyingResource(): void
