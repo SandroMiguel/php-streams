@@ -1,5 +1,9 @@
 # PhpStreams
 
+[![License](https://poser.pugx.org/sandromiguel/php-streams/license)](//packagist.org/packages/sandromiguel/verum-php)
+[![Latest Stable Version](https://poser.pugx.org/sandromiguel/php-streams/v)](//packagist.org/packages/sandromiguel/verum-php)
+[![Dependents](https://poser.pugx.org/sandromiguel/php-streams/dependents)](//packagist.org/packages/sandromiguel/verum-php)
+
 PhpStreams is a PHP library that provides stream handling following the PSR-7 standards.
 
 ## Features
