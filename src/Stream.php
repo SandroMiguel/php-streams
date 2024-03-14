@@ -7,7 +7,7 @@
  * @license MIT https://github.com/SandroMiguel/php-streams/blob/main/LICENSE
  * @author Sandro Miguel Marques <sandromiguel@sandromiguel.com>
  * @link https://github.com/SandroMiguel/php-streams
- * @version 1.0.1 (2024-03-13)
+ * @version 1.0.2 (2024-03-13)
  */
 
 declare(strict_types=1);
@@ -23,6 +23,9 @@ class Stream implements StreamInterface
 {
     /** @var resource|null Wrapped resource */
     private $resource;
+
+    /** @var array<string,mixed>|null Cached metadata */
+    private ?array $metadata;
 
     /**
      * Constructor.
@@ -51,6 +54,7 @@ class Stream implements StreamInterface
         }
 
         $this->resource = $resource;
+        $this->metadata = null;
     }
 
     /**
@@ -60,7 +64,7 @@ class Stream implements StreamInterface
      */
     public function isSeekable(): bool
     {
-        if (!$this->resource) {
+        if ($this->resource === null) {
             return false;
         }
 
@@ -76,7 +80,7 @@ class Stream implements StreamInterface
      */
     public function isWritable(): bool
     {
-        if (!$this->resource) {
+        if ($this->resource === null) {
             return false;
         }
 
@@ -97,7 +101,7 @@ class Stream implements StreamInterface
      */
     public function isReadable(): bool
     {
-        if (!$this->resource) {
+        if ($this->resource === null) {
             return false;
         }
 
@@ -121,11 +125,7 @@ class Stream implements StreamInterface
      */
     public function read(int $length): string
     {
-        if (!$this->resource) {
-            throw new \PhpStreams\Exceptions\ReadException(
-                'Unable to read from stream: resource is not available.'
-            );
-        }
+        $this->assertResourceAvailable();
 
         if (!$this->isReadable()) {
             throw new \PhpStreams\Exceptions\ReadException(
@@ -157,9 +157,7 @@ class Stream implements StreamInterface
      */
     public function write(string $string): int
     {
-        if (!$this->resource) {
-            throw new \PhpStreams\Exceptions\WriteException();
-        }
+        $this->assertResourceAvailable();
 
         if (!$this->isWritable()) {
             throw new \PhpStreams\Exceptions\WriteException(
@@ -183,15 +181,12 @@ class Stream implements StreamInterface
      */
     public function close(): void
     {
-        if (!$this->resource) {
-            return;
-        }
-
-        if (!\is_resource($this->resource)) {
+        if ($this->resource === null) {
             return;
         }
 
         \fclose($this->resource);
+        $this->resource = null;
     }
 
     /**
@@ -201,7 +196,7 @@ class Stream implements StreamInterface
      */
     public function eof(): bool
     {
-        if (!$this->resource) {
+        if ($this->resource === null) {
             return true;
         }
 
@@ -217,11 +212,7 @@ class Stream implements StreamInterface
      */
     public function tell(): int
     {
-        if (!$this->resource) {
-            throw new \PhpStreams\Exceptions\ReadException(
-                'Unable to read from stream: resource is not available.'
-            );
-        }
+        $this->assertResourceAvailable();
 
         $result = \ftell($this->resource);
 
@@ -244,11 +235,7 @@ class Stream implements StreamInterface
      */
     public function rewind(): void
     {
-        if (!$this->resource) {
-            throw new \PhpStreams\Exceptions\ReadException(
-                'Unable to read from stream: resource is not available.'
-            );
-        }
+        $this->assertResourceAvailable();
 
         if (!$this->isSeekable()) {
             throw new \PhpStreams\Exceptions\SeekException(
@@ -272,7 +259,7 @@ class Stream implements StreamInterface
      */
     public function getSize(): ?int
     {
-        if (!$this->resource) {
+        if ($this->resource === null) {
             return null;
         }
 
@@ -290,11 +277,7 @@ class Stream implements StreamInterface
      */
     public function getContents(): string
     {
-        if (!$this->resource) {
-            throw new \PhpStreams\Exceptions\ReadException(
-                'Unable to read from stream: resource is not available.'
-            );
-        }
+        $this->assertResourceAvailable();
 
         if (\get_resource_type($this->resource) !== 'stream') {
             throw new \PhpStreams\Exceptions\ReadException(
@@ -342,11 +325,7 @@ class Stream implements StreamInterface
      */
     public function seek(int $offset, int $whence = \SEEK_SET): void
     {
-        if (!$this->resource) {
-            throw new \PhpStreams\Exceptions\ReadException(
-                'Unable to read from stream: resource is not available.'
-            );
-        }
+        $this->assertResourceAvailable();
 
         if (!$this->isSeekable()) {
             throw new \PhpStreams\Exceptions\SeekException(
@@ -381,17 +360,34 @@ class Stream implements StreamInterface
      */
     public function getMetadata(?string $key = null): mixed
     {
-        if (!$this->resource) {
+        if ($this->resource === null) {
             return null;
         }
 
-        $meta = \stream_get_meta_data($this->resource);
-
-        if ($key === null) {
-            return $meta;
+        if ($this->metadata === null) {
+            $this->metadata = \stream_get_meta_data($this->resource);
         }
 
-        return $meta[$key] ?? null;
+        if ($key === null) {
+            return $this->metadata;
+        }
+
+        return $this->metadata[$key] ?? null;
+    }
+
+    /**
+     * Asserts that a valid resource is available for stream operations.
+     *
+     * @throws \PhpStreams\Exceptions\ReadException If the resource is not
+     *  available.
+     */
+    private function assertResourceAvailable(): void
+    {
+        if ($this->resource === null) {
+            throw new \PhpStreams\Exceptions\ReadException(
+                'Unable to read from stream: resource is not available.'
+            );
+        }
     }
 
     /**
