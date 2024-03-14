@@ -8,6 +8,7 @@
  * @author Sandro Miguel Marques <sandromiguel@sandromiguel.com>
  * @link https://github.com/SandroMiguel/php-streams
  * @version 1.0.2 (2024-03-13)
+ * @phpcs:disable SlevomatCodingStandard.TypeHints.DisallowMixedTypeHint.DisallowedMixedTypeHint
  */
 
 declare(strict_types=1);
@@ -19,7 +20,7 @@ use Psr\Http\Message\StreamInterface;
 /**
  * Stream class.
  */
-class Stream implements StreamInterface
+final class Stream implements StreamInterface
 {
     /** @var resource|null Wrapped resource */
     private $resource;
@@ -87,11 +88,11 @@ class Stream implements StreamInterface
         $meta = \stream_get_meta_data($this->resource);
         $mode = $meta['mode'];
 
-        return \strstr($mode, 'x')
-            || \strstr($mode, 'w')
-            || \strstr($mode, 'c')
-            || \strstr($mode, 'a')
-            || \strstr($mode, '+');
+        return \strstr($mode, 'x') !== false
+            || \strstr($mode, 'w') !== false
+            || \strstr($mode, 'c') !== false
+            || \strstr($mode, 'a') !== false
+            || \strstr($mode, '+') !== false;
     }
 
     /**
@@ -108,7 +109,7 @@ class Stream implements StreamInterface
         $meta = \stream_get_meta_data($this->resource);
         $mode = $meta['mode'];
 
-        return \strstr($mode, 'r') || \strstr($mode, '+');
+        return \strstr($mode, 'r') !== false || \strstr($mode, '+') !== false;
     }
 
     /**
@@ -125,7 +126,7 @@ class Stream implements StreamInterface
      */
     public function read(int $length): string
     {
-        $this->assertResourceAvailable();
+        $resource = $this->getNonNullResourceOrFail();
 
         if (!$this->isReadable()) {
             throw new \PhpStreams\Exceptions\ReadException(
@@ -135,7 +136,7 @@ class Stream implements StreamInterface
 
         $length = \max(0, $length);
 
-        $result = \fread($this->resource, $length);
+        $result = \fread($resource, $length);
 
         if ($result === false) {
             throw new \PhpStreams\Exceptions\ReadException(
@@ -157,7 +158,7 @@ class Stream implements StreamInterface
      */
     public function write(string $string): int
     {
-        $this->assertResourceAvailable();
+        $resource = $this->getNonNullResourceOrFail();
 
         if (!$this->isWritable()) {
             throw new \PhpStreams\Exceptions\WriteException(
@@ -165,7 +166,7 @@ class Stream implements StreamInterface
             );
         }
 
-        $result = \fwrite($this->resource, $string);
+        $result = \fwrite($resource, $string);
 
         if ($result === false) {
             throw new \PhpStreams\Exceptions\WriteException(
@@ -212,9 +213,9 @@ class Stream implements StreamInterface
      */
     public function tell(): int
     {
-        $this->assertResourceAvailable();
+        $resource = $this->getNonNullResourceOrFail();
 
-        $result = \ftell($this->resource);
+        $result = \ftell($resource);
 
         if ($result === false) {
             throw new \RuntimeException('Unable to determine stream position');
@@ -229,13 +230,11 @@ class Stream implements StreamInterface
      * If the stream is not seekable, this method will raise an exception;
      * otherwise, it will perform a seek(0).
      *
-     * @throws \PhpStreams\Exceptions\ReadException If resource is not
-     *  available.
      * @throws \PhpStreams\Exceptions\SeekException If stream is not seekable.
      */
     public function rewind(): void
     {
-        $this->assertResourceAvailable();
+        $resource = $this->getNonNullResourceOrFail();
 
         if (!$this->isSeekable()) {
             throw new \PhpStreams\Exceptions\SeekException(
@@ -243,7 +242,7 @@ class Stream implements StreamInterface
             );
         }
 
-        $result = \fseek($this->resource, 0, \SEEK_SET);
+        $result = \fseek($resource, 0, \SEEK_SET);
 
         if ($result === -1) {
             throw new \PhpStreams\Exceptions\SeekException(
@@ -277,15 +276,15 @@ class Stream implements StreamInterface
      */
     public function getContents(): string
     {
-        $this->assertResourceAvailable();
+        $resource = $this->getNonNullResourceOrFail();
 
-        if (\get_resource_type($this->resource) !== 'stream') {
+        if (\get_resource_type($resource) !== 'stream') {
             throw new \PhpStreams\Exceptions\ReadException(
                 'Unable to read from stream: supplied resource is not a valid stream resource.'
             );
         }
 
-        $result = \stream_get_contents($this->resource);
+        $result = \stream_get_contents($resource);
 
         if ($result === false) {
             throw new \PhpStreams\Exceptions\ReadException();
@@ -313,19 +312,17 @@ class Stream implements StreamInterface
      * @param int $offset Stream offset
      * @param int $whence Specifies how the cursor position will be calculated
      *  based on the seek offset. Valid values are identical to the built-in
-     *  PHP $whence values for `fseek()`.  SEEK_SET: Set position equal to
+     *  PHP $whence values for `fseek()`. SEEK_SET: Set position equal to
      *  offset bytes SEEK_CUR: Set position to current location plus offset
      *  SEEK_END: Set position to end-of-stream plus offset.
      *
-     * @throws \PhpStreams\Exceptions\ReadException If resource is not
-     *  available.
      * @throws \PhpStreams\Exceptions\SeekException If stream is not seekable.
      * @throws \PhpStreams\Exceptions\InvalidStreamException If invalid seek
      *   offset is specified.
      */
     public function seek(int $offset, int $whence = \SEEK_SET): void
     {
-        $this->assertResourceAvailable();
+        $resource = $this->getNonNullResourceOrFail();
 
         if (!$this->isSeekable()) {
             throw new \PhpStreams\Exceptions\SeekException(
@@ -339,7 +336,7 @@ class Stream implements StreamInterface
             );
         }
 
-        $result = \fseek($this->resource, $offset, $whence);
+        $result = \fseek($resource, $offset, $whence);
 
         if ($result === -1) {
             throw new \PhpStreams\Exceptions\SeekException();
@@ -354,9 +351,9 @@ class Stream implements StreamInterface
      *
      * @param string $key Specific metadata to retrieve.
      *
-     * @return array|mixed|null Returns an associative array if no key is
-     *  provided. Returns a specific key value if a key is provided and the
-     *  value is found, or null if the key is not found.
+     * @return array<string,mixed>|mixed|null Returns an associative array if
+     *  no key is provided. Returns a specific key value if a key is provided
+     *  and the value is found, or null if the key is not found.
      */
     public function getMetadata(?string $key = null): mixed
     {
@@ -378,16 +375,20 @@ class Stream implements StreamInterface
     /**
      * Asserts that a valid resource is available for stream operations.
      *
+     * @return resource Returns a non-null resource.
+     *
      * @throws \PhpStreams\Exceptions\ReadException If the resource is not
      *  available.
      */
-    private function assertResourceAvailable(): void
+    private function getNonNullResourceOrFail()
     {
         if ($this->resource === null) {
             throw new \PhpStreams\Exceptions\ReadException(
                 'Unable to read from stream: resource is not available.'
             );
         }
+
+        return $this->resource;
     }
 
     /**

@@ -17,7 +17,7 @@ namespace PhpStreams\Exceptions;
 /**
  * Exception thrown when an invalid stream resource is provided.
  */
-final class InvalidStreamException extends \PhpStreams\Exceptions\StreamException
+final class InvalidStreamException extends \PhpStreams\Exceptions\AbstractStreamException
 {
     /**
      * Constructor.

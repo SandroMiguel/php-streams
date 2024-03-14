@@ -17,7 +17,7 @@ namespace PhpStreams\Exceptions;
 /**
  * Exception thrown when an error occurs while reading from a stream.
  */
-final class ReadException extends \PhpStreams\Exceptions\StreamException
+final class ReadException extends \PhpStreams\Exceptions\AbstractStreamException
 {
     /**
      * Constructor.

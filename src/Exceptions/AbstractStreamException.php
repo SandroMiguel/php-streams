@@ -17,7 +17,7 @@ namespace PhpStreams\Exceptions;
 /**
  * Base exception class for stream-related exceptions.
  */
-class StreamException extends \RuntimeException
+abstract class AbstractStreamException extends \RuntimeException
 {
     /**
      * Constructor.

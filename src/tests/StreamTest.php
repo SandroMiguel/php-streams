@@ -44,7 +44,7 @@ class StreamTest extends TestCase
             'Invalid or non-stream resource provided. Provided resource type: non-resource'
         );
 
-        new Stream('invalid_resource');
+        new Stream(false);
     }
 
     /**

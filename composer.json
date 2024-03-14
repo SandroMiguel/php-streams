@@ -62,10 +62,10 @@
         "outdated:direct": "Check for outdated Composer dependencies that are defined directly in your project.",
         "phpcs": "Run PHP CodeSniffer on the source code in src directory.",
         "phpcs:file": "Run PHP CodeSniffer on a specific file.",
-        "phpinsights": "Analyze code quality and architecture with PHP Insights.",
         "phpmetrics": "Generate PHP Metrics report and display Node.js version.",
         "phpstan": "Run PHPStan analysis with level 7 on the source code in src directory.",
         "psalm": "Run Psalm static analysis.",
+        "phpinsights": "Analyze code quality and architecture with PHP Insights.",
         "logs": "Tail the application log located at ./storage/log/app.log.",
         "test": "Run PHPUnit tests.",
         "test:coverage": "Run PHPUnit tests and generate coverage report in log/report directory."
