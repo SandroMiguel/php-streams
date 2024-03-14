@@ -17,7 +17,7 @@ namespace PhpStreams\Exceptions;
 /**
  * Exception thrown when an error occurs during stream writing.
  */
-final class WriteException extends \PhpStreams\Exceptions\StreamException
+final class WriteException extends \PhpStreams\Exceptions\AbstractStreamException
 {
     /**
      * Constructor.

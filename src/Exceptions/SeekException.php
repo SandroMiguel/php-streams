@@ -17,7 +17,7 @@ namespace PhpStreams\Exceptions;
 /**
  * Exception thrown when an error occurs during stream seeking.
  */
-final class SeekException extends \PhpStreams\Exceptions\StreamException
+final class SeekException extends \PhpStreams\Exceptions\AbstractStreamException
 {
     /**
      * Constructor.
