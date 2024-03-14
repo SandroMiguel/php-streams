@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/SandroMiguel/php-streams/compare/v1.1.0...v1.2.0) (2024-03-14)
+
+
+### Features
+
+* **Stream.php:** implemented caching of stream metadata to improve performance ([f68badf](https://github.com/SandroMiguel/php-streams/commit/f68badf0aa722841c7b8fae757a006462bb113db))
+* **Stream.php:** refactor resource availability check to avoid code duplication ([d7c888d](https://github.com/SandroMiguel/php-streams/commit/d7c888d32263f176d6b49db2341c52f5accc2da4))
+
 ## [1.1.0](https://github.com/SandroMiguel/php-streams/compare/v1.0.0...v1.1.0) (2024-03-13)
 
 
