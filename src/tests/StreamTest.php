@@ -408,7 +408,7 @@ class StreamTest extends TestCase
 
         $this->expectException(\PhpStreams\Exceptions\ReadException::class);
         $this->expectExceptionMessage(
-            'supplied resource is not a valid stream resource'
+            'Unable to read from stream: resource is not available.'
         );
 
         $stream->getContents();
